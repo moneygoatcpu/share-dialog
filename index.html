@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Native Share</title>
+</head>
+<body>
+    <button id="shareButton">Share This</button>
+    <script>
+        document.getElementById('shareButton').addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Check this out!',
+                    text: 'Here is something interesting!',
+                    url: 'https://example.com',
+                }).then(() => {
+                    console.log('Shared successfully!');
+                }).catch(err => {
+                    console.error('Error sharing:', err);
+                });
+            } else {
+                alert('Sharing is not supported on this browser.');
+            }
+        });
+    </script>
+</body>
+</html>
