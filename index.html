@@ -3,34 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Native Share</title>
+    <title>Share Content</title>
 </head>
 <body>
     <script>
-        // Function to parse URL parameters
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
+        // Function to get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            const results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
 
-        // Get the text and URL to share from the URL parameters
-        const shareText = getQueryParam('text') || 'Default share text';
-        const shareUrl = getQueryParam('url') || 'https://defaulturl.com'; // Default URL if none provided
+        // Function to handle sharing
+        async function shareContent() {
+            const textToShare = getUrlParameter('text');
+            const urlToShare = getUrlParameter('url');
 
-        // Automatically trigger the native share dialog
-        if (navigator.share) {
-            navigator.share({
-                title: 'Check this out!', // Optional: Title for the share dialog
-                text: shareText,         // Text from the URL parameter
-                url: shareUrl,           // URL from the URL parameter
-            }).then(() => {
-                console.log('Shared successfully!');
-            }).catch(err => {
-                console.error('Error sharing:', err);
-            });
-        } else {
-            alert('Sharing is not supported on this browser.');
+            // Prepare share data
+            const shareData = {
+                title: 'Share',
+                text: textToShare,
+                url: urlToShare
+            };
+
+            try {
+                // Check if Web Share API is supported
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                    console.log('Shared successfully');
+                } else {
+                    console.log('Web Share API not supported');
+                    // Fallback message for unsupported browsers
+                    document.body.innerHTML = '<p>Sharing is not supported on this device/browser.</p>';
+                }
+            } catch (err) {
+                console.log('Error sharing:', err);
+                document.body.innerHTML = '<p>Error sharing content.</p>';
+            }
         }
+
+        // Trigger share when page loads
+        window.onload = shareContent;
     </script>
 </body>
 </html>
