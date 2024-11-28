@@ -4,9 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Share Content</title>
+    <style>
+        .debug-info {
+            font-family: monospace;
+            padding: 10px;
+            margin: 10px;
+            background: #f0f0f0;
+            display: none;
+        }
+    </style>
 </head>
 <body>
+    <div id="debug-info" class="debug-info"></div>
+    <button id="shareButton" style="display: none;">Share Content</button>
+
     <script>
+        const debugInfo = document.getElementById('debug-info');
+        const shareButton = document.getElementById('shareButton');
+
+        // Function to log debug information
+        function log(message) {
+            console.log(message);
+            debugInfo.style.display = 'block';
+            debugInfo.innerHTML += message + '<br>';
+        }
+
         // Function to get URL parameters
         function getUrlParameter(name) {
             name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
@@ -20,6 +42,8 @@
             const textToShare = getUrlParameter('text');
             const urlToShare = getUrlParameter('url');
 
+            log('Parameters received - Text: ' + textToShare + ', URL: ' + urlToShare);
+
             // Prepare share data
             const shareData = {
                 title: 'Share',
@@ -30,21 +54,40 @@
             try {
                 // Check if Web Share API is supported
                 if (navigator.share) {
-                    await navigator.share(shareData);
-                    console.log('Shared successfully');
+                    log('Web Share API is supported');
+                    try {
+                        await navigator.share(shareData);
+                        log('Shared successfully');
+                    } catch (shareError) {
+                        log('Share error: ' + shareError);
+                        // Show manual share button as fallback
+                        shareButton.style.display = 'block';
+                    }
                 } else {
-                    console.log('Web Share API not supported');
-                    // Fallback message for unsupported browsers
-                    document.body.innerHTML = '<p>Sharing is not supported on this device/browser.</p>';
+                    log('Web Share API not supported');
+                    // Show manual share button as fallback
+                    shareButton.style.display = 'block';
                 }
             } catch (err) {
-                console.log('Error sharing:', err);
-                document.body.innerHTML = '<p>Error sharing content.</p>';
+                log('Error: ' + err);
+                shareButton.style.display = 'block';
             }
         }
 
-        // Trigger share when page loads
-        window.onload = shareContent;
+        // Add click handler for manual share button
+        shareButton.addEventListener('click', shareContent);
+
+        // Try to share automatically after a short delay
+        setTimeout(shareContent, 1000);
+
+        // Also try on page load
+        window.addEventListener('load', shareContent);
+
+        // And try on user interaction
+        document.addEventListener('click', function firstClick() {
+            shareContent();
+            document.removeEventListener('click', firstClick);
+        });
     </script>
 </body>
 </html>
