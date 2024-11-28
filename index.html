@@ -6,23 +6,31 @@
     <title>Native Share</title>
 </head>
 <body>
-    <button id="shareButton">Share This</button>
     <script>
-        document.getElementById('shareButton').addEventListener('click', () => {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Check this out!',
-                    text: 'Here is something interesting!',
-                    url: 'https://example.com',
-                }).then(() => {
-                    console.log('Shared successfully!');
-                }).catch(err => {
-                    console.error('Error sharing:', err);
-                });
-            } else {
-                alert('Sharing is not supported on this browser.');
-            }
-        });
+        // Function to parse URL parameters
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Get the text and URL to share from the URL parameters
+        const shareText = getQueryParam('text') || 'Default share text';
+        const shareUrl = getQueryParam('url') || 'https://defaulturl.com'; // Default URL if none provided
+
+        // Automatically trigger the native share dialog
+        if (navigator.share) {
+            navigator.share({
+                title: 'Check this out!', // Optional: Title for the share dialog
+                text: shareText,         // Text from the URL parameter
+                url: shareUrl,           // URL from the URL parameter
+            }).then(() => {
+                console.log('Shared successfully!');
+            }).catch(err => {
+                console.error('Error sharing:', err);
+            });
+        } else {
+            alert('Sharing is not supported on this browser.');
+        }
     </script>
 </body>
 </html>
